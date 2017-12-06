@@ -27,7 +27,7 @@ all:  $(LIBFILE)
 ifeq ($(CUDA), true)
 
   #Default compute capability architectures we compile with
-  CUDA_ARCH=-gencode arch=compute_20,code=sm_20
+  CUDA_ARCH=
 
   #Get the CUDA Toolkit version (remove decimal point char)
   CUDA_VERSION=$(shell $(CUDATKDIR)/bin/nvcc -V | grep release | sed -e 's|.*release ||' -e 's|,.*||' -e 's|\.||')
@@ -60,8 +60,8 @@ ifeq ($(CUDA), true)
   CUDA_VER_GT_8_0 := $(shell [ $(CUDA_VERSION) -ge 80 ] && echo true)
   ifeq ($(CUDA_VER_GT_8_0), true)
     CUDA_ARCH += -gencode arch=compute_60,code=sm_60 \
-		 -gencode arch=compute_61,code=sm_61 \
-		 -gencode arch=compute_62,code=sm_62
+	-gencode arch=compute_61,code=sm_61 \
+	-gencode arch=compute_62,code=sm_62
   endif
 
 
@@ -70,6 +70,12 @@ ifeq ($(CUDA), true)
   ifneq ($(CUDA_VER_GT_6_5), true)
     CUDA_ARCH += -gencode arch=compute_13,code=sm_13 \
                  -gencode arch=compute_10,code=sm_10 
+  endif
+
+  #For toolkit older than 9.0, add the compute capability 2.0
+  CUDA_VER_GT_9_0 := $(shell [ $(CUDA_VERSION) -ge 90 ] && echo true)
+  ifneq ($(CUDA_VER_GT_9_0), true)
+    CUDA_ARCH += -gencode arch=compute_20,code=sm_20
   endif
 
 endif
